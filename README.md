@@ -2,7 +2,14 @@
 cocos2dx 播放视频插件, 支持lua调用
 ====
 
+TODO:
+=====
+
+*. ios 支持
+*. 播放时点击视频回调
+
 添加步骤:
+=====
 
 1. VideoView.h VideoView.cpp 放到c++ 的Classes 目录
 
