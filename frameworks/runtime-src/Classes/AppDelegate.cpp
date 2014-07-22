@@ -2,7 +2,7 @@
 #include "CCLuaEngine.h"
 #include "SimpleAudioEngine.h"
 #include "cocos2d.h"
-#include "VideoView.h"
+#include "lua_videoview_extends.h"
 
 using namespace CocosDenshion;
 
@@ -42,6 +42,8 @@ bool AppDelegate::applicationDidFinishLaunching()
 
     lua_State* L = engine->getLuaStack()->getLuaState();
     tolua_videoview_extension_open(L);
+
+    
 
     if (engine->executeScriptFile("src/main.lua")) {
         return false;

@@ -1,14 +1,21 @@
-#ifndef __VEDIOVIEW_H_
-#define __VEDIOVIEW_H_
+//
+// Created by liangwei on 14-7-22.
+//
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include "tolua++.h"
-#ifdef __cplusplus
-}
-#endif
 
-TOLUA_API int tolua_videoview_extension_open(lua_State* tolua_S);
+#ifndef __VideoViewWarper_H_
+#define __VideoViewWarper_H_
 
-#endif
+
+#include "cocos2d.h"
+#include "CCLuaEngine.h"
+
+using namespace cocos2d;
+
+class VideoView {
+public:
+    static void playVideo(const char* filename,int funcID);
+};
+
+
+#endif //__VideoViewWarper_H_

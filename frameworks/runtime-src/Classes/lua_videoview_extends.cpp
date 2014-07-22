@@ -1,22 +1,9 @@
-#include "VideoView.h"
+#include "lua_videoview_extends.h"
 #include "tolua_fix.h"
 #include "cocos2d.h"
 #include "CCLuaStack.h"
-#include "CCLuaValue.h"
-#include "CCLuaEngine.h"
-
+#include "VideoView.h"
 using namespace cocos2d;
-
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-#include <jni.h>
-#include "platform/android/jni/JniHelper.h"
-extern "C"  {
-	void Java_cn_sharedream_game_VideoView_doLuaFinishCallback(JNIEnv *env, jobject thiz,jint handle)
-	{
-		LuaEngine::getInstance()->getLuaStack()->executeFunctionByHandler(handle, 0);
-	}
-}
-#endif
 
 static int tolua_VideoView_play00(lua_State* tolua_S)
 {
@@ -33,19 +20,9 @@ static int tolua_VideoView_play00(lua_State* tolua_S)
     else
     {
         {
-        	const char* vedioFileName = ((const char*)  tolua_tostring(tolua_S,2,0));
+        	const char* filename = ((const char*)  tolua_tostring(tolua_S,2,0));
         	LUA_FUNCTION funcID = (toluafix_ref_function(tolua_S,3,0));
-			#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-					JniMethodInfo t;
-					if (JniHelper::getStaticMethodInfo(t,
-						"cn/sharedream/game/VideoView",
-						"playVideo",
-						"(Ljava/lang/String;I)V"))
-					{
-						t.env->CallStaticVoidMethod(t.classID, t.methodID,
-							t.env->NewStringUTF(vedioFileName),funcID);
-					}
-			#endif
+            VideoView::playVideo(filename,funcID);
         }
     }
     return 1;
