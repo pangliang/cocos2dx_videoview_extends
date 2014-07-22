@@ -37,37 +37,37 @@
 
 1. 一下文件拷贝到对应的目录里
 
-	Classes/VideoView.h
-	Classes/lua_videoview_extends.h
-	Classes/lua_videoview_extends.cpp
-
-	#android
-	proj.android/src/cn/sharedream/game/VideoView.java
-	proj.android/jni/VideoViewAndroidImp.cpp
-
-	#ios
-	proj.ios_mac/ios/VideoViewIOSImp.h
-	proj.ios_mac/ios/VideoViewIOSImp.mm
+		Classes/VideoView.h
+		Classes/lua_videoview_extends.h
+		Classes/lua_videoview_extends.cpp
+	
+		#android
+		proj.android/src/cn/sharedream/game/VideoView.java
+		proj.android/jni/VideoViewAndroidImp.cpp
+	
+		#ios
+		proj.ios_mac/ios/VideoViewIOSImp.h
+		proj.ios_mac/ios/VideoViewIOSImp.mm
 
 2. AppDelegate.cpp   注册VideoView 的lua 扩展
 
 		#include "lua_videoview_extends.h"
-
+	
 		bool AppDelegate::applicationDidFinishLaunching()
 		{
 		    ...
-
+	
 		    auto engine = LuaEngine::getInstance();
 		    ScriptEngineManager::getInstance()->setScriptEngine(engine);
-
+	
 		    //添加lua 扩展
 		    lua_State* L = engine->getLuaStack()->getLuaState();
 		    tolua_videoview_extension_open(L);
-
+	
 		    if (engine->executeScriptFile("src/main.lua")) {
 		        return false;
 		    }
-
+	
 		    return true;
 		}
 
