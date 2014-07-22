@@ -3,22 +3,55 @@
 
 ###TODO:
 
-* ios 支持
 * 播放时点击视频回调
+
+###支持平台
+
+* android
+* ios
+
+###文件说明
+
+	Classes/VideoView.h:
+
+			VideoView类接口定义
+
+	Classes/lua_videoview_extends.h(cpp): 
+
+			将VideoView类绑定到lua
+	
+	proj.android/src/cn/sharedream/game/VideoView.java
+			
+			android 原生视频播放器实现, 播放完毕回调native callback
+
+	proj.android/jni/VideoViewAndroidImp.cpp
+
+			android实现, 通过jni调用 VideoView.java 的播放方法, 并实现native callback
+
+	proj.ios_mac/ios/VideoViewIOSImp.h
+	proj.ios_mac/ios/VideoViewIOSImp.mm
+
+			ios实现, 通过 MPMoviePlayerController 进行播放
 
 ###添加步骤:
 
-1. VideoView.h VideoView.cpp 放到c++ 的Classes 目录
+1. 一下文件拷贝到对应的目录里
 
-2. 修改jni 的 Android.mk  添加VideoView.cpp 编译
+	Classes/VideoView.h
+	Classes/lua_videoview_extends.h
+	Classes/lua_videoview_extends.cpp
 
-		LOCAL_SRC_FILES := ... \
-			   ../../Classes/VideoView.cpp \
-	           ...
+	#android
+	proj.android/src/cn/sharedream/game/VideoView.java
+	proj.android/jni/VideoViewAndroidImp.cpp
 
-3. AppDelegate.cpp   添加lua 扩展
+	#ios
+	proj.ios_mac/ios/VideoViewIOSImp.h
+	proj.ios_mac/ios/VideoViewIOSImp.mm
 
-		#include "VideoView.h"
+2. AppDelegate.cpp   注册VideoView 的lua 扩展
+
+		#include "lua_videoview_extends.h"
 
 		bool AppDelegate::applicationDidFinishLaunching()
 		{
@@ -38,10 +71,16 @@
 		    return true;
 		}
 
-4. cn.sharedream.game.VideoView.java  放到android java src 目录
+#####android
 
+3. 修改jni 的 Android.mk  添加VideoViewAndroidImp.cpp 和 lua_videoview_extends.cpp 编译
 
-5. 在lua中使用
+		LOCAL_SRC_FILES := ... \
+			VideoViewAndroidImp.cpp \
+			../../Classes/lua_videoview_extends.cpp \
+	        ...
+
+###在lua中使用
 
 		-- 播放完之后的回调函数
 		local function videoFinish()

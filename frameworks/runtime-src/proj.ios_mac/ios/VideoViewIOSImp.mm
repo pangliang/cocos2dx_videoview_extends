@@ -8,7 +8,6 @@
 @implementation VideoViewIOSImp
 
 -(void) doMovieFinishedNotification:(NSNotification*)aNotification{
-    NSLog(@"doMovieFinishedNotification");
     MPMoviePlayerController *player = [aNotification object];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMoviePlayerPlaybackDidFinishNotification object:player];
 
