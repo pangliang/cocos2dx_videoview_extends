@@ -178,17 +178,13 @@ local function main()
         local function videoFinish()
             print("================videoFinish")
             cc.Director:getInstance():startAnimation();
-            cc.SimpleAudioEngine:getInstance():pauseMusic();
+            cc.SimpleAudioEngine:getInstance():resumeMusic();
         end
 
         local function menuCallbackOpenPopup()
               cc.Director:getInstance():stopAnimation();
               cc.SimpleAudioEngine:getInstance():pauseMusic();
               VideoView:play("res/video2.mp4",videoFinish)
---            -- loop test sound effect
---            local effectPath = cc.FileUtils:getInstance():fullPathForFilename("effect1.wav")
---            effectID = cc.SimpleAudioEngine:getInstance():playEffect(effectPath)
---            menuPopup:setVisible(true)
         end
 
         -- add a popup menu
