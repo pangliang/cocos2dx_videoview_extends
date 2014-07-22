@@ -1,39 +1,29 @@
 
-#cocos2dx 播放视频插件, 支持lua调用
+#cocos2dx 播放视频插件
 
-###TODO:
+##特性:
 
-* 播放时点击视频回调
+* lua绑定
+* 播放完成事件回调
+* 支持android, ios平台
 
-###支持平台
+##使用示例:
 
-* android
-* ios
+    -- 播放完之后的回调函数
+    local function videoFinish()
+        print("================videoFinish")
+        --恢复游戏, 和原来的声音
+        cc.Director:getInstance():startAnimation();
+        cc.SimpleAudioEngine:getInstance():pauseMusic();
+    end
+    
+    -- 原游戏, 声音暂停
+    cc.Director:getInstance():stopAnimation();
+    cc.SimpleAudioEngine:getInstance():pauseMusic();
+    VideoView:play("res/video2.mp4",videoFinish)
 
-###文件说明
 
-	Classes/VideoView.h:
-
-			VideoView类接口定义
-
-	Classes/lua_videoview_extends.h(cpp): 
-
-			将VideoView类绑定到lua
-	
-	proj.android/src/cn/sharedream/game/VideoView.java
-			
-			android 原生视频播放器实现, 播放完毕回调native callback
-
-	proj.android/jni/VideoViewAndroidImp.cpp
-
-			android实现, 通过jni调用 VideoView.java 的播放方法, 并实现native callback
-
-	proj.ios_mac/ios/VideoViewIOSImp.h
-	proj.ios_mac/ios/VideoViewIOSImp.mm
-
-			ios实现, 通过 MPMoviePlayerController 进行播放
-
-###添加步骤:
+##添加步骤:
 
 1. 一下文件拷贝到对应的目录里
 
@@ -60,10 +50,11 @@
 		    auto engine = LuaEngine::getInstance();
 		    ScriptEngineManager::getInstance()->setScriptEngine(engine);
 	
-		    //添加lua 扩展
+		    //==============添加lua 扩展
 		    lua_State* L = engine->getLuaStack()->getLuaState();
 		    tolua_videoview_extension_open(L);
-	
+	        //==============添加lua 扩展end
+	        
 		    if (engine->executeScriptFile("src/main.lua")) {
 		        return false;
 		    }
@@ -71,26 +62,39 @@
 		    return true;
 		}
 
-#####android
-
-3. 修改jni 的 Android.mk  添加VideoViewAndroidImp.cpp 和 lua_videoview_extends.cpp 编译
+3. **android部分** 修改jni 的 Android.mk  添加VideoViewAndroidImp.cpp 和 lua_videoview_extends.cpp 编译
 
 		LOCAL_SRC_FILES := ... \
 			VideoViewAndroidImp.cpp \
 			../../Classes/lua_videoview_extends.cpp \
 	        ...
+	        
+##TODO:
 
-###在lua中使用
+* 播放时点击视频回调
 
-		-- 播放完之后的回调函数
-		local function videoFinish()
-	        print("================videoFinish")
-	        --恢复游戏, 和原来的声音
-	        cc.Director:getInstance():startAnimation();
-	        cc.SimpleAudioEngine:getInstance():pauseMusic();
-	    end
+##文件说明
 
-	    -- 原游戏, 声音暂停
-	    cc.Director:getInstance():stopAnimation();
-		cc.SimpleAudioEngine:getInstance():pauseMusic();
-		VideoView:play("res/video2.mp4",videoFinish)
+	Classes/VideoView.h:
+
+			VideoView类接口定义
+
+	Classes/lua_videoview_extends.h(cpp): 
+
+			将VideoView类绑定到lua
+	
+	proj.android/src/cn/sharedream/game/VideoView.java
+			
+			android 原生视频播放器实现, 播放完毕回调native callback
+
+	proj.android/jni/VideoViewAndroidImp.cpp
+
+			android实现, 通过jni调用 VideoView.java 的播放方法, 并实现native callback
+
+	proj.ios_mac/ios/VideoViewIOSImp.h
+	proj.ios_mac/ios/VideoViewIOSImp.mm
+
+			ios实现, 通过 MPMoviePlayerController 进行播放
+	        
+
+
