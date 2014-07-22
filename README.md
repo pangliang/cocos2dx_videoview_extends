@@ -14,7 +14,7 @@
         print("================videoFinish")
         --恢复游戏, 和原来的声音
         cc.Director:getInstance():startAnimation();
-        cc.SimpleAudioEngine:getInstance():pauseMusic();
+        cc.SimpleAudioEngine:getInstance():resumeMusic();
     end
     
     -- 原游戏, 声音暂停
