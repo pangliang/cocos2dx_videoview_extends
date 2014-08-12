@@ -182,11 +182,23 @@ public class VideoView extends SurfaceView implements
 			fd = null;
 		}
 		
-		ViewGroup group = (ViewGroup)gameActivity.getWindow().getDecorView();
-		group.removeView(this);
+		final AppActivity instance = AppActivity.instance;
+		instance.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				ViewGroup group = (ViewGroup)instance.getWindow().getDecorView();
+				group.removeView(VideoView.this);
+			}
+		});
 		
-		if(luaOnFinishCallback != 0)
-			doLuaFinishCallback(luaOnFinishCallback);
+		if (luaOnFinishCallback != 0){
+			instance.runOnGLThread(new Runnable() {
+				@Override
+				public void run() {
+					doLuaFinishCallback(luaOnFinishCallback);
+				}
+			});
+		}
 			
 	}
 	
