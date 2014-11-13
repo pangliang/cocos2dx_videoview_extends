@@ -62,3 +62,4 @@ frameworks/runtime-src/proj.ios_mac/mac/Info.plist
 frameworks/runtime-src/proj.ios_mac/mac/main.cpp
 frameworks/runtime-src/proj.ios_mac/mac/Prefix.pch
 frameworks/runtime-src/proj.ios_mac/Build
+frameworks/runtime-src/proj.ios_mac/DerivedData
