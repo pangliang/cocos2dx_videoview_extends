@@ -69,9 +69,6 @@
 			../../Classes/lua_videoview_extends.cpp \
 	        ...
 	        
-##TODO:
-
-* 播放时点击视频回调
 
 ##文件说明
 
