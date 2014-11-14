@@ -26,6 +26,10 @@
     
 }
 
+- (void)onSkipButtonClick:(UITapGestureRecognizer *)recognizer {
+    [player stop];
+}
+
 -(void) playVideo:(const char*) filename luaFuncID:(int) funcID callback:(void (*)(int)) callback{
     
     movieFinishedCallback = callback;
@@ -65,11 +69,18 @@
     }
     [player play];
     
-    for (UIView * view in player.view.subviews) {
-        
-        UITapGestureRecognizer * recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
-        [view addGestureRecognizer:recognizer];
-    }
+//    for (UIView * view in player.view.subviews) {
+//        
+//        UITapGestureRecognizer * recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+//        [view addGestureRecognizer:recognizer];
+//    }
+    
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [button addTarget:self action:@selector(onSkipButtonClick:) forControlEvents:UIControlEventTouchUpInside];
+    button.tintColor = [UIColor colorWithRed:1 green:1 blue:1 alpha:0.4];
+    [button setTitle:@"Skip >>" forState:UIControlStateNormal];
+    button.frame = CGRectMake(player.view.frame.size.width*0.75, player.view.frame.size.height*0.86, 160.0, 40.0);
+    [player.view addSubview:button];
     
 }
 @end
