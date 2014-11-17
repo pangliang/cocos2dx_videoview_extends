@@ -5,18 +5,19 @@ import java.io.IOException;
 import org.cocos2dx.lib.Cocos2dxLuaJavaBridge;
 import org.cocos2dx.lua.AppActivity;
 
-import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
+import android.graphics.Color;
 import android.media.MediaPlayer;
+import android.os.Debug;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 
 public class VideoView extends SurfaceView implements SurfaceHolder.Callback,
-		View.OnTouchListener,
 		MediaPlayer.OnErrorListener, MediaPlayer.OnInfoListener,
 		MediaPlayer.OnCompletionListener {
 	private static final String TAG = "VideoView";
@@ -24,20 +25,36 @@ public class VideoView extends SurfaceView implements SurfaceHolder.Callback,
 	private MediaPlayer mPlayer; // MediaPlayer对象
 	private AssetFileDescriptor fd;
 	int luaOnFinishCallback;
-	private static long videoStartTime = 0;
-	private static long videoFinishLimit = 5 *1000;
 	private boolean surfaceCreated = false;
 
-	public VideoView(Activity context) {
-		
-		super(context);
+	private TextView skipButton = null;
+	final private AppActivity appActivity ;
+
+	public VideoView(AppActivity appActivity) {
+
+		super(appActivity);
+		this.appActivity = appActivity;
 		Log.i(TAG, "new VideoView");
-
 		final SurfaceHolder holder = getHolder();
-		holder.addCallback(this); // 设置回调接口
-		setOnTouchListener(this);
+		holder.addCallback(this);
 
+		this.addSkipButton();
+	}
+	
+	private void addSkipButton(){
+		skipButton = new TextView(this.appActivity);
+		skipButton.setText("跳过 >>");
+		skipButton.setTextColor(Color.argb(180, 255, 255, 255));
+		skipButton.setTextSize(20);
+
+		skipButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				onVideoFinish();
+			}
+		});
 		
+		((ViewGroup) this.appActivity.getWindow().getDecorView()).addView(
+				skipButton);
 	}
 
 	public void setVideo(AssetFileDescriptor fd) {
@@ -57,38 +74,58 @@ public class VideoView extends SurfaceView implements SurfaceHolder.Callback,
 			e.printStackTrace();
 		}
 	}
+	
+	private void fixSzie(SurfaceHolder holder)
+	{
+		int wWidth = getWidth();
+		int wHeight = getHeight();
+
+		/* 获得视频宽长 */
+		int vWidth = mPlayer.getVideoWidth();
+		int vHeight = mPlayer.getVideoHeight();
+
+		Log.i(TAG, "fixSzie:"+vWidth+","+vHeight);
+		
+		/* 最适屏幕 */
+		float wRatio = (float) vWidth / (float) wWidth; // 宽度比
+		float hRatio = (float) vHeight / (float) wHeight; // 高度比
+		float ratio = Math.max(wRatio, hRatio); // 较大的比
+		vWidth = (int) Math.ceil((float) vWidth / ratio); // 新视频宽度
+		vHeight = (int) Math.ceil((float) vHeight / ratio); // 新视频高度
+
+		// 改变SurfaceHolder大小
+		holder.setFixedSize(vWidth, vHeight);
+		
+		if (skipButton != null) {
+			
+			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+					skipButton.getWidth(), skipButton.getHeight());
+			params.leftMargin = (int) (getWidth() * 0.8);
+			params.topMargin = (int) (getHeight() * 0.86);
+			skipButton.setLayoutParams(params);
+			
+			skipButton.bringToFront();
+		}
+	}
 
 	@Override
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
 			int height) {
+		Log.i(TAG, "surfaceChanged:"+width+","+height);
+		this.fixSzie(holder);
 	}
 
 	@Override
-	public void surfaceCreated(final SurfaceHolder holder) {
+	public void surfaceCreated(SurfaceHolder holder) {
 		Log.i(TAG, "surfaceCreated");
 		try {
-			
-			int wWidth = getWidth();
-			int wHeight = getHeight();
 
-			/* 获得视频宽长 */
-			int vWidth = mPlayer.getVideoWidth();
-			int vHeight = mPlayer.getVideoHeight();
+			this.fixSzie(holder);
 
-			/* 最适屏幕 */
-			float wRatio = (float) vWidth / (float) wWidth; // 宽度比
-			float hRatio = (float) vHeight / (float) wHeight; // 高度比
-			float ratio = Math.max(wRatio, hRatio); // 较大的比
-			vWidth = (int) Math.ceil((float) vWidth / ratio); // 新视频宽度
-			vHeight = (int) Math.ceil((float) vHeight / ratio); // 新视频高度
-
-			// 改变SurfaceHolder大小
-			holder.setFixedSize(vWidth, vHeight);
-			
 			mPlayer.setDisplay(holder); // 指定SurfaceHolder
 			mPlayer.seekTo(posttion);
 			mPlayer.start();
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			onVideoFinish();
@@ -97,19 +134,18 @@ public class VideoView extends SurfaceView implements SurfaceHolder.Callback,
 
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
-		
+
 		try {
 			Log.i(TAG, "surfaceDestroyed");
-			if (mPlayer != null){
+			if (mPlayer != null) {
 				posttion = mPlayer.getCurrentPosition();
 				mPlayer.pause();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-	}
 
+	}
 
 	@Override
 	public void onCompletion(MediaPlayer mp) {
@@ -129,25 +165,12 @@ public class VideoView extends SurfaceView implements SurfaceHolder.Callback,
 		return false;
 	}
 
-	@Override
-	public boolean onTouch(View v, MotionEvent event) {
-		if (event.getAction() == MotionEvent.ACTION_DOWN) {
-			long now =System.currentTimeMillis();
-			System.out.println("key down: nowSecns=" + now + ",limitSecns"
-					+ (videoStartTime + videoFinishLimit));
-			if (now > (videoStartTime + videoFinishLimit)) {
-				onVideoFinish();
-			}
-		}
-		return true;
-	}
-
 	int posttion;
 
 	public void onVideoFinish() {
 		Log.i(TAG, "onVideoFinish");
 		try {
-			if (mPlayer != null){
+			if (mPlayer != null) {
 				mPlayer.stop();
 				mPlayer.release();
 				mPlayer = null;
@@ -161,30 +184,35 @@ public class VideoView extends SurfaceView implements SurfaceHolder.Callback,
 			e.printStackTrace();
 		}
 		try {
-			final AppActivity instance = AppActivity.instance;
+			final AppActivity instance = this.appActivity;
 			instance.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					try{
+					try {
+
 						ViewGroup group = (ViewGroup) instance.getWindow()
 								.getDecorView();
 						group.removeView(VideoView.this);
-					}catch(Exception e){
+
+						if (skipButton != null) {
+							group.removeView(skipButton);
+						}
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
 			});
-			
+
 			if (luaOnFinishCallback != 0) {
 				instance.runOnGLThread(new Runnable() {
 					@Override
 					public void run() {
-						try{
+						try {
 							Cocos2dxLuaJavaBridge.callLuaFunctionWithString(
 									luaOnFinishCallback, "FINISH");
 							Cocos2dxLuaJavaBridge
 									.releaseLuaFunction(luaOnFinishCallback);
-						}catch(Exception e){
+						} catch (Exception e) {
 							e.printStackTrace();
 						}
 					}
@@ -201,21 +229,21 @@ public class VideoView extends SurfaceView implements SurfaceHolder.Callback,
 
 	public static void playVideo(final String name, final int luaCallback) {
 		final AppActivity instance = AppActivity.instance;
-		videoStartTime = System.currentTimeMillis();
 		if (instance != null) {
 			instance.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					VideoView videoView = new VideoView(instance);
+					final VideoView videoView = new VideoView(instance);
 					videoView.setLuaOnFinishCallback(luaCallback);
 					try {
 						AssetFileDescriptor afd = instance.getAssets().openFd(
 								name);
 						videoView.setVideo(afd);
-						ViewGroup group = (ViewGroup) instance.getWindow()
-								.getDecorView();
+						final ViewGroup group = (ViewGroup) instance
+								.getWindow().getDecorView();
 						group.addView(videoView);
 						videoView.setZOrderMediaOverlay(true);
+
 					} catch (IOException e) {
 						e.printStackTrace();
 						videoView.onVideoFinish();
@@ -224,6 +252,6 @@ public class VideoView extends SurfaceView implements SurfaceHolder.Callback,
 			});
 		}
 	}
-	
+
 	public native void doLuaFinishCallback(int luaCallback);
 }
