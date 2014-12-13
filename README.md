@@ -1,6 +1,10 @@
 
 #cocos2dx 播放视频插件
 
+##停止维护
+
+貌似看到cocos2dx v3 版已经自带了一个videoplayer, 所以这个就停止维护了!
+
 ##特性:
 
 * lua绑定
